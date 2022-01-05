@@ -1,6 +1,28 @@
-dist:  trusty
+dist: trusty
 jdk: oraclejdk8
 language: java
 services:
   - postgresql
   - docker
+env:
+  global:
+    - secure: "CVYjQKJLpHoi9N75xcTfPYDg2EGOSllkWxba/vBzE6Z6sT3tRPoaH0rz4b7Lfp4B/n1/Dnf8NdOAVyUdwmpwNIdj17VI+09RD5M9FpSzp83ZSK+GVu/H3xwZ5JygENdKeYEMXdmJ1hXqJ6wTHrpwjddBFGlbJneVKZ3AcuhN6yoUA9LmGWJT6EFYk3TlmoZp+VFc/MkJ5hhVIGK7Hvb8JeL2JKAJaNFkMiBiHz/mBmz9BlbG0GR3WsxFCPdM/obG+ZVBs8kSo3yBuTlO0sMrhqmIUanzaPUuzlXh/k4vStQ9OjZgIMqtD4pCzOfeKn0v2QA4z3aZZrLKoF/b3hKRqNhz74RBf43yROiEDEFjXO7fYZf+otdIpRDbQrLBBaJxuin/9KA4+Ccx2z/HAByOApwGRsqZO+qiHhIJkfj6hpbXry68gEVtinld2ppAbv93HK1bQC/trY2MSRzJDySfqYl6EctrMcfzAMecoKJaFIeo26d6JpLO2Vq7c4y8Ok54c3db4ix3OHdRtE7wYzkBP9k3yrFzBNrOi6blRDPQeThW83mIlJv3SwHs9S9L2ePckADAXtdXcHO4asfY+bPnukiecq2ie/DG/oAak/Kmnz0dBuvq/YvWtqjZatsIg/hRRfvZBwZUR/gMFoGr8qerzNanWdSeoHc04mO9RTewBP4="
+    - secure: "ExgcVXUVc8zhNVlO63EzHCjViSc4BaSl5AZ7xZzhnXN8d2IcI8c6q9Gj34/VctlqaHLcBXS+vVooOvciDnvh5XMpjb4atRTedWVe0y66j9yEoc9mtswMfker1qMhf0u7ct0HN1dQpGCrVXPaTWbcesuKQCiOttL/k7l/eXHv3j72UsBuA2ve6rv8i0GfV7SI5XBUoXiS+9PnrdfNTByje8639bo7jhd+5QwqmIRd/LqQsKQzqk7+UBXtlQmuecLx/l2gEFNDwfHqhk/TSc0xot8yqcLHg4jQ1VOueh8RTPuf8adAFy+wXvMBPBi61Sf82HAU3fndRugeMLNZMLNcoq/4pWu2yw3m88038wgJxmdZhrXsdepcPUpxveEsvCLQEKXhDl2oN700LLRFEkdTKmzREWIw9jOaulCHriDGu27rin3afcxA50uAA1csA/KVuutVCfrn6p87MjM0ZQLWhiRXkxqh1TqczMPE0OVwF1p8qy3DPTgFECtM1nEZjzdBfgomDd7qMeTjwFkK3rMqHhnTXTGdgTn4jopafRgCwSWkp7TNsCpuM3MG/P/Sl9mr78mq7Ra6Z4HzXQIHJB4mQ3O1VguJEpid4hsX/EnmxTPSpxpSaTGHlejL1nsD03L11vAHSoS89nMZ25J1sMcu5x89OPKK5tWwGlQWD+smlbw="
+    - secure: "MktarT5FePf1mleDlhFDMn6IWjfvDIFnP8Mr7cg9Zs2zI0zRXmnpfGwjl7/4KynS5qIuwiRNyGQnOw5twTfTCTSc/mJGnQvOo9z9fWZmhGGmlvN1numZJQ/PQoze1pTNKlmygGuFZNQmH6/unhk4EXaLX9I6GJHxjFZfQSjb8OD6akPjOe0ze6zqQWPnAuOVobHmdOTiqhCEejtZUKDDRaQ7QZaKw1p9x/bbZNrSrn1tdYdboM0mm2PLK/N4QDex8/MaylseSZP96cp9/xHE4DFDGYaVXyiHMzpZ3slhAKFx02x3pSXkitakS/4g2AlsxGfotaJ2yVJgMNAZwfG5hAPQk9ZcQxV1M/IH/QJBjPwqnUSxuj5F3usmJW9T09o/l3QoU1hyzzohhXw4mBegjio+efAadhoJTp6PMNq3v493iVc8qzwvZt2mSkOP69nGk/XhRqiuGf4+pfSbNCmsG75D9vdomWKahgqApZX4gC0XWO7LGKk2AJsL2OrA/31KvzfLGqNji3SPGJ2hCDnh8uBsMhXzofpSJFUBfBzNarwG6aBIf5uqNuSwyNc7T0ua+y3dgl8KbF0tXFklMXSzl10xmlFj9PiHV9SFCL7Z9jJeQA2Xjnf05RNYdqorGKvRoW+qOjje2o5l78/xDqQg3Q4jU2JkYbeX85ndHsmpGx8="
+    - COMMIT=${TRAVIS_COMMIT::7}
+
+script:
+  - ./mvnw clean install -B
+
+after_success:
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo "$TRAVIS_BRANCH"; fi`
+  - export IMAGE_NAME=myapi/springboot-api
+  - docker build -t $IMAGE_NAME:latest .
+  - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$TAG
+  - docker push $IMAGE_NAME:$TAG
+
+deploy:
+  provider: heroku
+  api_key: $HEROKU_API_KEY
+  app: spingboot-api

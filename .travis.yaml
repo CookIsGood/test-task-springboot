@@ -3,3 +3,4 @@ dist: trusty # репозиторий внутри travis
   language: java
   services:
     - postgresql
+    - docker

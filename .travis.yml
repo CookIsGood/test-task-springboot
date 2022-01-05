@@ -22,5 +22,5 @@ after_success:
 deploy:
   provider: heroku
   api_key: $HEROKU_API_KEY
-  all_branches: true
+  branch: main
   app: spingboot-api

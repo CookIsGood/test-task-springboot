@@ -41,9 +41,7 @@
 ### Endpoint для получения имени хоста
 - GET: http://localhost:8080/status
 
-### Лабораторная работа №3: CI/CD и деплой приложения в Heroku
-- Целью лабораторной работы является знакомство с CI/CD и его реализацией на примере Travis CI и Heroku.
-
+### CI/CD
 - Travis CI badge:
 
   [click!](https://app.travis-ci.com/github/CookIsGood/test-task-springboot)
